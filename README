@@ -1,0 +1,7 @@
+MP3, OGG ve FLAC formatlı dosyalarınızdan oluşan müzik arşivinizi ID3 etiketlerine düzenleyen basit bir python programı.
+
+ID3 etiketlerini okumak için mutagen kullandım: http://code.google.com/p/mutagen/
+
+Etiketi bulunmayan veya formata(mp3, ogg, flac) uymayan dosyaları ayrı bir klasöre taşır veya kopyalar.
+
+mechanize(http://wwwsearch.sourceforge.net/mechanize/) kütüphanesinin bulunması durumunda albüm kapaklarını indirebilir.
