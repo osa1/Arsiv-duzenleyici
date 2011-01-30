@@ -14,8 +14,6 @@ import gobject
 
 logfile = True
 
-# test
-
 
 class Gui:
     def __init__(self):

@@ -38,8 +38,6 @@ class Duzenleyici:
                 Format = dosya.split(".")[-1]
                 if Format in self.supported_formats:
                     _dosya = os.path.join(ana_dizin, dosya)
-                    # dikkat
-                    print _dosya
                     #if self.hedef in ana_dizin and self.hedef != self.yer:
                         #continue
                     self.gui.printg("%s " % _dosya)
@@ -147,8 +145,13 @@ class AlbumArtDownloader:
         for artist in artists:
             p = os.path.join(self.place, artist)
             for album in os.listdir(p):
-                if os.path.isdir(os.path.join(p, album)):
-                    albums.append("%s:::%s" % (artist, album))
+                t = os.path.join(p, album)
+                if os.path.isdir(t):
+                    files = os.listdir(t)
+                    if "cover.jpg" in files or "cover.png" in files or "cover.gif" in files:
+                        pass
+                    else:
+                        albums.append("%s:::%s" % (artist, album))
 
         for album in albums:
             self.download_albumart(album)

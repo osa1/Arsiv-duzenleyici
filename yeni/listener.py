@@ -12,10 +12,11 @@ from main import cp, yurut
 """
 
 wm = inotify.WatchManager()
-mask = inotify.IN_CLOSE_NOWRITE|inotify.IN_CREATE
+mask = inotify.IN_CLOSE_NOWRITE|inotify.IN_CREATE|inotify.IN_CLOSE_WRITE
 target = "/home/osa1/Desktop/testler"
 
-d = duzenleyici.Duzenleyici(target, target, cp, duzenleyici.DummyGui(), False)
+gui = duzenleyici.DummyGui()
+d = duzenleyici.Duzenleyici(target, target, yurut, gui, False)
 
 class EventHandler(inotify.ProcessEvent):
 
@@ -28,13 +29,20 @@ class EventHandler(inotify.ProcessEvent):
             self.folders.append(folder)
         print event
 
+    def process_IN_CLOSE_WRITE(self, event):
+        # bu ne sinyal ne zaman veriliyor?
+        print event
+
     def process_IN_CLOSE_NOWRITE(self, event):
+        if event.name == "":
+            return
         try:
             self.t.cancel()
         except:
             pass
-        self.t = threading.Timer(2.0, self.start)
-        self.t.start()
+        if self.folders != []:
+            self.t = threading.Timer(2.0, self.start)
+            self.t.start()
         print event
 
     def test(self):
@@ -55,6 +63,16 @@ class EventHandler(inotify.ProcessEvent):
                     except StopIteration:
                         print "stopiteration"
                         break
+
+        ad = duzenleyici.AlbumArtDownloader(gui)
+        task = ad.scan(target)
+        while True:
+            try:
+                task.next()
+            except StopIteration:
+                print "stopiteration"
+                break
+
 
 
 handler = EventHandler()
