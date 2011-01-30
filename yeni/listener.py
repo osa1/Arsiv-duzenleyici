@@ -3,6 +3,7 @@
 
 import inotify
 import os
+from shutil import rmtree
 import duzenleyici
 import threading
 from main import cp, yurut
@@ -17,6 +18,7 @@ target = "/home/osa1/Desktop/testler"
 
 gui = duzenleyici.DummyGui()
 d = duzenleyici.Duzenleyici(target, target, yurut, gui, False)
+d.logfile = False
 
 class EventHandler(inotify.ProcessEvent):
 
@@ -25,15 +27,12 @@ class EventHandler(inotify.ProcessEvent):
     def process_IN_CREATE(self, event):
         print "Creating:", event.pathname
         folder = event.pathname
-        if not folder in self.folders:
+        if not folder in self.folders and \
+                not folder in d.created_folders:
             self.folders.append(folder)
         print event
 
-    def process_IN_CLOSE_WRITE(self, event):
-        # bu ne sinyal ne zaman veriliyor?
-        print event
-
-    def process_IN_CLOSE_NOWRITE(self, event):
+    def process_IN_CLOSE(self, event):
         if event.name == "":
             return
         try:
@@ -53,8 +52,8 @@ class EventHandler(inotify.ProcessEvent):
     def start(self):
         for path in self.folders:
             self.folders.remove(path)
-            d.yer = path
             if os.path.isdir(path):
+                d.yer = path
                 d.control()
                 task = d.main()
                 while True:
@@ -63,6 +62,12 @@ class EventHandler(inotify.ProcessEvent):
                     except StopIteration:
                         print "stopiteration"
                         break
+                rmtree(path)
+            else:
+                d.yer = target
+                d.organize(target, os.path.split(path)[-1])
+
+            
 
         ad = duzenleyici.AlbumArtDownloader(gui)
         task = ad.scan(target)

@@ -16,12 +16,23 @@ def kontrol(b):
         b = os.sep.join(_b[:-1]) + os.path.sep + "_" + _b[-1]
     return b
 
+def delete_if_exists(func):
+    # decorator for listener
+    # when listener creates a file, a new signal emitted
+    # because of the new folder, then listener copies tries to organize it again..
+    def wrapper(a, b):
+        if os.path.isfile(b):
+            return
+        return func(a, b)
+    return wrapper
 
+@delete_if_exists
 def cp(a, b):
     "Shutil.copy kullanarak kopyalama yapar. Once cakisma icin konrol eder."
     copy(a, kontrol(b))
 
 
+@delete_if_exists
 def yurut(a, b):
     "Shutil.move kullanarak kopyalama yapar. Once cakisma icin kontrol eder."
     move(a, kontrol(b))
