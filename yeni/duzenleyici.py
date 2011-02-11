@@ -6,6 +6,7 @@ import re
 import gobject
 import urllib2
 import threading
+from shutil import rmtree
 from mutagen.easyid3 import EasyID3 as id3
 from mutagen.flac import Open as flac
 from mutagen.oggvorbis import Open as ogg
@@ -22,11 +23,6 @@ class Duzenleyici:
         self.supported_formats = ['mp3', 'flac', 'ogg']
         self.logfile = True
 
-        # (for listener)
-        # a list for folders created by organizer
-        # with this, we can prevent trying to organize already organized folders
-        self.created_folders = []
-
     def control(self):
         if not os.path.isdir(self.yer):
             self.gui.printg(u'Arsiv konumu hatali.\n')
@@ -37,51 +33,58 @@ class Duzenleyici:
             self.gui.printg(u' OK\n')
         return True
 
-    def main(self, dosyalar=None):
+    #def main(self, dosyalar=None):
+    #    for ana_dizin, dizinler, dosyalar in os.walk(self.yer):
+    #        for dosya in dosyalar:
+    #            #self.organize(ana_dizin, dosya)
+    #            yield self.organize(ana_dizin, dosya) 
+
+    #    self.download_albumcover()
+    #    self.handle_errors()
+    #    self.clean()
+    #    yield False
+
+    def organize(self):
         for ana_dizin, dizinler, dosyalar in os.walk(self.yer):
             for dosya in dosyalar:
-                self.organize(ana_dizin, dosya)
-                yield True
+                Format = dosya.split(".")[-1]
+                if Format in self.supported_formats:
+                    _dosya = os.path.join(ana_dizin, dosya)
+                    #if self.hedef in ana_dizin and self.hedef != self.yer:
+                        #continue
+                    self.gui.printg("%s " % _dosya)
+                    try:
+                        if Format == "mp3":
+                            dosya = id3(_dosya)
+                        elif Format == "flac":
+                            dosya = flac(_dosya)
+                        elif Format == "ogg":
+                            dosya = ogg(_dosya)
+                        self.songs += 1
+                        artist = dosya["artist"][0].replace("/", "-")
+                        album = dosya["album"][0].replace("/", "-")
+                        title = dosya["title"][0].replace("/", "-")
+                        try:
+                            os.makedirs(os.path.join(self.hedef, artist, album))
+                        except OSError:
+                            pass
+                        self.method(_dosya, "%s.%s" %
+                                (os.path.join(self.hedef, artist, album, title),
+                                    Format))
+                        self.update_counter()
+                        self.gui.printg("ok..\n")
+                    except:
+                        self.errors.append(_dosya)
+                        self.gui.printg("error..\n")
+                else:
+                    self.errors.append(os.path.join(ana_dizin, dosya))
+                yield True 
 
         self.download_albumcover()
         self.handle_errors()
+        self.clean()
         yield False
 
-    def organize(self, ana_dizin, dosya):
-        Format = dosya.split(".")[-1]
-        if Format in self.supported_formats:
-            _dosya = os.path.join(ana_dizin, dosya)
-            #if self.hedef in ana_dizin and self.hedef != self.yer:
-                #continue
-            self.gui.printg("%s " % _dosya)
-            try:
-                if Format == "mp3":
-                    dosya = id3(_dosya)
-                elif Format == "flac":
-                    dosya = flac(_dosya)
-                elif Format == "ogg":
-                    dosya = ogg(_dosya)
-                self.songs += 1
-                artist = dosya["artist"][0].replace("/", "-")
-                album = dosya["album"][0].replace("/", "-")
-                title = dosya["title"][0].replace("/", "-")
-                try:
-                    os.makedirs(os.path.join(self.hedef, artist, album))
-                    self.created_folders.append(os.path.join(
-                        self.hedef, artist))
-                except OSError:
-                    pass
-                #print "////////////////////////", self.created_folders
-                self.method(_dosya, "%s.%s" %
-                        (os.path.join(self.hedef, artist, album, title),
-                            Format))
-                self.update_counter()
-                self.gui.printg("ok..\n")
-            except:
-                self.errors.append(_dosya)
-                self.gui.printg("error..\n")
-        else:
-            self.errors.append(os.path.join(ana_dizin, dosya))
 
     def download_albumcover(self):
         if self.cover:
@@ -119,7 +122,13 @@ class Duzenleyici:
             self.gui.printg("ok..\n")
         self.gui.update_statusbar("Done.")
 
+    def clean(self):
+        """Removes empty folders in target."""
+        recursive_cleaner(self.yer)
+        
+
     def run(self):
+        """Run method for listener."""
         self.control()
         if isinstance(self.yer, list):
             backup = self.yer
@@ -131,6 +140,30 @@ class Duzenleyici:
             for x in self.main:
                 pass
         self.handle_errors()
+
+
+def count_files(folder):
+    """Recursively counts files in a folder. Does not count folders."""
+    r = 0
+    l = os.listdir(folder)
+    if not l:
+        return r
+    for f in l:
+        if os.path.isdir(os.path.join(folder, f)):
+            r += count_files(os.path.join(folder, f))
+        else:
+            r += 1
+    return r
+
+
+def recursive_cleaner(folder):
+    """Recursively check folders and removes if it's empty"""
+    l = os.listdir(folder)
+    for f in l:
+        addr = os.path.join(folder, f)
+        if os.path.isdir(addr) and not count_files(addr):
+            rmtree(os.path.join(folder, f))
+
 
 
 class AlbumArtDownloader:

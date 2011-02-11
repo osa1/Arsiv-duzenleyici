@@ -218,7 +218,7 @@ class Gui:
         if not self.logfile:
             d.logfile = False
         d.control()
-        task = d.main()
+        task = d.organize()
         gobject.idle_add(task.next)
 
     def about(self, widget):

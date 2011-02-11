@@ -22,6 +22,7 @@ def delete_if_exists(func):
     # because of the new folder, then listener copies tries to organize it again..
     def wrapper(a, b):
         if os.path.isfile(b):
+            os.remove(b)
             return
         return func(a, b)
     return wrapper
@@ -35,6 +36,7 @@ def cp(a, b):
 @delete_if_exists
 def yurut(a, b):
     "Shutil.move kullanarak kopyalama yapar. Once cakisma icin kontrol eder."
+    print "moving"
     move(a, kontrol(b))
 
 if __name__ == "__main__":
