@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 
+"""
+TODO
+
+Klasor degil de dosya eklendiginde, album kapagini indirmiyor.
+Hallet.
+
+"""
+
 import os
+from shutil import move
+from shutil import copy2
 from fsmonitor import FSMonitor
 
 class Monitor:
@@ -8,6 +18,7 @@ class Monitor:
     def __init__(self, folder_to_watch=None):
         self.observers = []
         self.folder_to_watch = folder_to_watch
+        self.folders_to_ignore = set()
 
     def add_observer(self, observer):
         self.observers.append(observer)
@@ -45,7 +56,7 @@ class Observer:
         self.method = method 
         self.monitor = monitor
         self.monitor.add_observer(self)
-        self.files_to_ignore = set()
+        self.folders_to_ignore = set()
         self.created_files = set()
         self.attribd_files = set()
 
@@ -56,22 +67,18 @@ class Observer:
             self.attribd_files.update([attribd_files])
 
         # attribd signal emitted when copying a file is done
-        for f in self.created_files & self.attribd_files:
-            self.method(f)
+        for f in self.created_files & self.attribd_files - self.folders_to_ignore:
+            self.folders_to_ignore.update(self.method(f, move))
             self.created_files.remove(f)
             self.attribd_files.remove(f)
 
-
-class Organizer:
-    def organize(self, *args, **kwargs):
-        print "I'm teh organizer."
-        print "organizing:"
-        print args
-        print kwargs
-
-
-m = Monitor("/home/osa1/Desktop/fsw")
-org = Organizer()
-observer = Observer(m, org.organize)
-m.add_observer(observer)
-m.start()
+if __name__ == "__main__":
+    from yeniduzenleyici import Organizer, AlbumArtDownloader, DummyGui
+    dg = DummyGui()
+    yer = "/home/osa1/Desktop/test"
+    org = Organizer(yer, dg, cover=True)
+    aad = AlbumArtDownloader(dg)
+    m = Monitor(yer)
+    observer = Observer(m, org.organize)
+    m.add_observer(observer)
+    m.start()
