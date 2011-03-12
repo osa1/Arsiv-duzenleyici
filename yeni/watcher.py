@@ -9,6 +9,7 @@ Hallet.
 """
 
 import os
+from sys import argv
 from shutil import move
 from shutil import copy2
 from fsmonitor import FSMonitor
@@ -73,9 +74,14 @@ class Observer:
             self.attribd_files.remove(f)
 
 if __name__ == "__main__":
+    if len(argv) != 2:
+        print "to use watcher: watcher.py folder-to-watch"
+        print "to organize   : yeniduzenleyici.py folder-to-organize"
+        exit(2)
+
     from yeniduzenleyici import Organizer, AlbumArtDownloader, DummyGui
     dg = DummyGui()
-    yer = "/home/osa1/Desktop/test"
+    yer = argv[1]
     org = Organizer(yer, dg, cover=True)
     aad = AlbumArtDownloader(dg)
     m = Monitor(yer)

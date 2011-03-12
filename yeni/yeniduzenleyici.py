@@ -6,6 +6,7 @@ import os
 import shutil
 import urllib2
 import threading
+from sys import argv
 from shutil import rmtree
 from mutagen.flac import Open as flac
 from mutagen.oggvorbis import Open as ogg
@@ -87,6 +88,7 @@ class Organizer:
         created_folders.update([self.__handle_errors(method, self.archive)])
         if self.cover:
             self.__download_albumcover(created_folders)
+        self.clean(self.archive)
         return created_folders
 
     def __download_albumcover(self, created_folders):
@@ -128,6 +130,7 @@ class Organizer:
         self.__cmethod(f, '%s.%s' % (
             os.path.join(self.archive, artist, album, title), frmt), method)
         created_folders.update([os.path.join(self.archive, artist)])
+        self.clean(self.archive)
         return created_folders
 
     def organize(self, f, method, target_folder=None):
@@ -276,14 +279,16 @@ class DummyGui:
         pass
 
 if __name__ == "__main__":
-    #yer = "/home/osa1/Desktop/test/Ruins of The Perished.mp3"
-    yer = "/home/osa1/Desktop/test"
-    #yer = "/home/osa1/Desktop/test/testconcurrent.py"
+    # argparse kullanilabilir
+    if len(argv) != 2:
+        print "to use watcher: watcher.py folder-to-watch"
+        print "to organize   : yeniduzenleyici.py folder-to-organize"
+        exit(2)
+
     dg = DummyGui()
-    org = Organizer(dg)
-    org.organize(yer, shutil.copy2)
-    print "aad basla"
     aad = AlbumArtDownloader(dg)
+    yer = argv[1]
+    org = Organizer(yer, dg)
+
+    org.organize(yer, shutil.move)
     aad.scan(yer)
-    print "aad bit"
-    print org._Organizer__errors 
