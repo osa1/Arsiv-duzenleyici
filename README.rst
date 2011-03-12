@@ -17,8 +17,7 @@ Icindekiler
  * osa1.py - Nautilus scripti icin, arayuzsuz. Kurulum yapilmasi lazim.
  * Arsiv Duzenle - Nautilus scriptleri, ~/.gnome2/nautilus-scripts altina atilmalilar. Once programin kurulu olmasi lazim.
 
+Diger
+-----
 
-Yapilacaklar ve notlar
------------------------
-
-Su anda gui.py haric calismiyor. Duzenenip, setup dosyasi hazirlanip, program haline getirilecek. Tercume edilecek, kaynak koda dokumantasyon eklenecek, tercume konusunda bilir kisi onayi alinip dagitimlar icin paket haline getirilecek.
+An itibariyle yeni klasorundeki yeni(?!) hali calisiyor. watcher.py, kaynak kodda belirtilen(duzeltilecek) klasoru izleyip, ekleme halinde otomatik duzenleme yapar, duzenleme sonrasi bos klasorleri temizler, album kapaklarini indirir(kucuk bir istisna disinda, duzeltilecek).

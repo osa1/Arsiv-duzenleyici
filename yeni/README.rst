@@ -1,8 +1,9 @@
 Arsiv duzenleyici gelistirme deposu
 -----------------------------------
 
+Klasor dinleme ozelligi eklendi. Son kullanici icin birkac duzenleme yapilacak.
+
 Eklenecekler:
 
- * Klasor dinleme
- * Metatag duzenltme
- * TidySongs'un sahip oldugu diger ozellikler
+    * Deamon olarak calisma
+    * Arayuz
