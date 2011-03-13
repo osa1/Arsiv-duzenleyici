@@ -1,0 +1,3 @@
+include watcher.py
+include yeniduzenleyici.py
+include README.rst
