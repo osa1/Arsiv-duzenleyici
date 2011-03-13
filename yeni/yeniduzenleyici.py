@@ -88,7 +88,7 @@ class Organizer:
         created_folders.update([self.__handle_errors(method, self.archive)])
         if self.cover:
             self.__download_albumcover(created_folders)
-        self.clean(self.archive)
+        clean(self.archive)
         return created_folders
 
     def __download_albumcover(self, created_folders):
@@ -130,7 +130,7 @@ class Organizer:
         self.__cmethod(f, '%s.%s' % (
             os.path.join(self.archive, artist, album, title), frmt), method)
         created_folders.update([os.path.join(self.archive, artist)])
-        self.clean(self.archive)
+        clean(self.archive)
         return created_folders
 
     def organize(self, f, method, target_folder=None):
@@ -151,26 +151,28 @@ class Organizer:
         self.__errors = []
         return error_folder
 
-    def clean(self, target):
-        """Removes empty folders. Recursively."""
-        l = os.listdir(target)
-        for f in l:
-            addr = os.path.join(target, f)
-            if os.path.isdir(addr) and not self.count_files(addr):
-                rmtree(os.path.join(target, f))
+def clean(target):
+    """Removes empty folders. Recursively."""
+    l = os.listdir(target)
+    for f in l:
+        addr = os.path.join(target, f)
+        if os.path.isdir(addr) and not count_files(addr):
+            rmtree(os.path.join(target, f))
 
-    def count_files(self, folder):
-        """Recursively counts files in a folder. Does not count folders."""
-        r = 0
-        l = os.listdir(folder)
-        if not l:
-            return r
-        for f in l:
-            if os.path.isdir(os.path.join(folder, f)):
-                r += self.count_files(os.path.join(folder, f))
-            else:
-                r += 1
+
+def count_files(folder):
+    """Recursively counts files in a folder. Does not count folders."""
+    r = 0
+    l = os.listdir(folder)
+    if not l:
         return r
+    for f in l:
+        if os.path.isdir(os.path.join(folder, f)):
+            r += count_files(os.path.join(folder, f))
+        else:
+            r += 1
+    return r
+
 
 class AlbumArtDownloader:
     def __init__(self, gui):
@@ -180,7 +182,8 @@ class AlbumArtDownloader:
         self.br = mechanize.Browser()
         self.br.open('http://images.google.com')
         self.br.select_form(nr=0)
-        self.br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]  # lulz
+        self.br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1)' + 
+                               'Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]  # lulz
         self.br.set_handle_equiv(False)
         self.br.set_handle_robots(False)
         self.sayac = 0
